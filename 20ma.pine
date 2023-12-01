@@ -2,7 +2,7 @@
 strategy("20 MA Reversion Strategy", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=10)
 
 // Define the percentage from the moving average for the trigger
-percentFromMA = 0.0015 // 0.18% MOVE previous use / now testing with .15%
+percentFromMA = 0.0020 // 0.18% MOVE previous use / now testing with .15%
 
 // Calculate the 20-period moving average
 ma20 = ta.sma(close, 20)
