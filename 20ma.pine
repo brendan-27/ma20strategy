@@ -1,26 +1,19 @@
 //@version=5
 strategy("20 MA Reversion Strategy", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=10)
 
-// Define the percentage from the moving average for the trigger
 percentFromMA = 0.0020 // 0.18% MOVE previous use / now testing with .15%
-
-// Calculate the 20-period moving average
 ma20 = ta.sma(close, 20)
 
-// Determine if the price has dived at least 0.18% off the 20 MA for a long position
 longPriceDive = close < ma20 * (1 - percentFromMA)
-// Determine if the price has gone at least 0.18% off the 20 MA for a short position
 shortPriceDive = close > ma20 * (1 + percentFromMA)
-
-// Entry conditions
+// entry condition
 longCondition = longPriceDive and strategy.position_size == 0
 shortCondition = shortPriceDive and strategy.position_size == 0
-
-// Initialize variables to keep track of the high and low since the condition was met
+// keep track of high and low
 var float highSinceDive = na
 var float lowSinceDive = na
 
-// Check for entry conditions and update highSinceDive and lowSinceDive
+// entry conditions
 if (longCondition)
     highSinceDive := high
 else if (strategy.position_size > 0)
@@ -30,23 +23,20 @@ if (shortCondition)
     lowSinceDive := low
 else if (strategy.position_size < 0)
     lowSinceDive := math.min(lowSinceDive, low)
-
-// Enter positions
+//entrance
 if (longCondition)
     strategy.entry("Long", strategy.long)
 if (shortCondition)
     strategy.entry("Short", strategy.short)
 
-// Exit conditions based on a new high or low
+//exit
 exitLongCondition = strategy.position_size > 0 and high > highSinceDive
 exitShortCondition = strategy.position_size < 0 and low < lowSinceDive
-
 if (exitLongCondition)
     strategy.close("Long")
 if (exitShortCondition)
     strategy.close("Short")
-
-// Take profit conditions when the price hits the moving average again
+//tp
 takeProfitLong = strategy.position_size > 0 and close >= ma20
 takeProfitShort = strategy.position_size < 0 and close <= ma20
 
@@ -55,5 +45,5 @@ if (takeProfitLong)
 if (takeProfitShort)
     strategy.close("Short")
 
-// Plot the moving average
+//plot line
 plot(ma20, color=color.blue)

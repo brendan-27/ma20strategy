@@ -1,32 +1,27 @@
 //@version=5
 strategy("20 MA Reversion Strategy", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=10)
 
-// Define the percentage from the moving average for the trigger
 percentFromMA = 0.0015 // 0.15%
-// Define the percentage for the stop loss
 stopLossPercent = 0.0015 // 0.05%
 
-// Calculate the 20-period moving average
+
 ma20 = ta.sma(close, 20)
 
-// Determine if the price has dived at least 0.15% off the 20 MA for a long position
 longPriceDive = close < ma20 * (1 - percentFromMA)
-// Determine if the price has gone at least 0.15% off the 20 MA for a short position
 shortPriceDive = close > ma20 * (1 + percentFromMA)
 
-// Entry conditions
+// entry condition
 longCondition = longPriceDive and strategy.position_size == 0
 shortCondition = shortPriceDive and strategy.position_size == 0
 
-// Initialize variables to keep track of the high and low since the condition was met
+// high and low dives
 var float highSinceDive = na
 var float lowSinceDive = na
 
-// Initialize variables to track the entry price
 var float longEntryPrice = na
 var float shortEntryPrice = na
 
-// Check for entry conditions and update highSinceDive, lowSinceDive, and entry prices
+// entry condition Check
 if (longCondition)
     highSinceDive := high
     longEntryPrice := close
@@ -43,13 +38,13 @@ else if (strategy.position_size < 0)
 stopLossLongCondition = strategy.position_size > 0 and close < longEntryPrice * (1 - stopLossPercent)
 stopLossShortCondition = strategy.position_size < 0 and close > shortEntryPrice * (1 + stopLossPercent)
 
-// Enter positions
+// enter
 if (longCondition)
     strategy.entry("Long", strategy.long)
 if (shortCondition)
     strategy.entry("Short", strategy.short)
 
-// Exit conditions based on a new high or low and stop loss
+// SL
 exitLongCondition = (strategy.position_size > 0 and high > highSinceDive) or stopLossLongCondition
 exitShortCondition = (strategy.position_size < 0 and low < lowSinceDive) or stopLossShortCondition
 
@@ -58,7 +53,7 @@ if (exitLongCondition)
 if (exitShortCondition)
     strategy.close("Short")
 
-// Take profit conditions when the price hits the moving average again
+// TP
 takeProfitLong = strategy.position_size > 0 and close >= ma20
 takeProfitShort = strategy.position_size < 0 and close <= ma20
 
@@ -67,5 +62,5 @@ if (takeProfitLong)
 if (takeProfitShort)
     strategy.close("Short")
 
-// Plot the moving average
+// plot 20ma
 plot(ma20, color=color.blue)
